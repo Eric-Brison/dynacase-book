@@ -1,18 +1,17 @@
 <?php
-// ---------------------------------------------------------------
-// $Id: BOOK.app,v 1.1 2009/01/15 15:52:11 eric Exp $
-// $Source: /home/cvsroot/anakeen/freedom/book/BOOK.app,v $
-
+/*
+ * @author Anakeen
+ * @license http://www.fsf.org/licensing/licenses/agpl-3.0.html GNU Affero General Public License
+*/
 
 $app_desc = array(
     "name" => "BOOK", //Name
-    "short_name" => N_("book"), //Short name
-    "access_free" => "Y", //Access free ? (Y,N)
+    "short_name" => N_("book") , //Short name
     "icon" => "book.png", //Icon
     "displayable" => "N", //Should be displayed on an app list (Y,N)
-    "with_frame" => "Y", //Use multiframe ? (Y,N)
-    "childof" => "" // instance of ONEFAM application
+    "childof" => ""
+    // instance of ONEFAM application
+    
 );
-
 
 $action_desc = array();
