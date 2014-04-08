@@ -121,6 +121,9 @@ Class openDocument
     
     function innerXML(&$node)
     {
+        /**
+         * @var DOMNode $node
+         */
         if (!$node) return false;
         $document = $node->ownerDocument;
         $nodeAsString = $document->saveXML($node);
@@ -128,4 +131,3 @@ Class openDocument
         return $match[1];
     }
 }
-?>

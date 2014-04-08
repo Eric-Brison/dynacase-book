@@ -13,6 +13,7 @@
  */
 Class _COLLATING extends Doc
 {
+    private $ott;
     /*
      * @end-method-ignore
     */
@@ -30,16 +31,22 @@ Class _COLLATING extends Doc
             $tstates[$k] = "";
             if ($v) {
                 $fstate = strtok($fstates[$k], ' ');
-                if ($fstate == "_latest_") $d = new_doc($this->dbaccess, $v, true);
-                else $d = new_doc($this->dbaccess, $v);
+                if ($fstate == "_latest_") {
+                    $d = \Dcp\DocManager::getDocument($v);
+                } else {
+                    $d = \Dcp\DocManager::getDocument($v, false);
+                }
                 if ($fstate) {
-                    if (($fstate != "_latest_") && ($fstate != "_fixed_")) {
+                    if ($d !== null && ($fstate != "_latest_") && ($fstate != "_fixed_")) {
                         $lid = $d->getRevisionState($fstate, true);
-                        if ($lid) $d = new_doc($this->dbaccess, $lid);
-                        else $d = false;
+                        if ($lid) {
+                            $d = \Dcp\DocManager::getDocument($lid, false);
+                        } else {
+                            $d = null;
+                        }
                     }
                 }
-                if ($d && $d->isAlive()) {
+                if ($d !== null && $d->isAlive()) {
                     $aid = trim(strtok($tattrids[$k], ' '));
                     $tchaps[$k] = $d->id;
                     if (!$aid) {
@@ -157,7 +164,7 @@ Class _COLLATING extends Doc
             $this->ott = new openDocument($this->vault_filename_fromvalue($ott, true));
             
             $ottbody = $this->ott->getOfficeTag('body');
-            foreach ($tfiles as $k => $v) {
+            foreach ($tfiles as $v) {
                 $chap = new openDocument($this->vault_filename_fromvalue($v, true));
                 if ($chap) {
                     $officetextnode = $chap->getOfficeTag('text');
@@ -185,4 +192,3 @@ Class _COLLATING extends Doc
 /*
  * @end-method-ignore
 */
-?>
