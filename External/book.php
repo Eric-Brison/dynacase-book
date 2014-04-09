@@ -7,7 +7,7 @@
 
 function lbookstates($dbaccess, $docid, $name = "")
 {
-    $doc = new_doc($dbaccess, $docid);
+    $doc = \Dcp\DocManager::getDocument($docid, false);
     $tr = array();
     $staticstates = array(
         "_fixed_" . " (" . _("fixed revision") . ")",
@@ -20,10 +20,10 @@ function lbookstates($dbaccess, $docid, $name = "")
         );
     }
     
-    if ($doc->isAlive() && $doc->wid) {
-        $wdoc = new_doc($dbaccess, $doc->wid, false);
+    if ($doc !== null && $doc->isAlive() && $doc->wid) {
+        $wdoc = \Dcp\DocManager::getDocument($doc->wid, false);
         /* @var $wdoc WDoc */
-        if ($wdoc && method_exists($wdoc, "getStates")) {
+        if ($wdoc !== null && method_exists($wdoc, "getStates")) {
             $states = $wdoc->getStates();
             $pattern = preg_quote($name);
             foreach ($states as $v) {
@@ -36,4 +36,3 @@ function lbookstates($dbaccess, $docid, $name = "")
     }
     return $tr;
 }
-?>

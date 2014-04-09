@@ -19,14 +19,11 @@ Class _CHAPTER extends Doc
     
     function preCreated()
     {
-        $book = new_doc($this->dbaccess, $this->getRawValue("chap_bookid"));
-        if ($book->isAlive()) {
-            if ($book->locked == - 1) { // it is revised document
-                $ldocid = $book->getLatestId();
-                if ($ldocid != $book->id) $book = new_Doc($this->dbaccess, $ldocid);
+        $book = \Dcp\DocManager::getDocument($this->getRawValue("chap_bookid"));
+        if ($book !== null && $book->isAlive()) {
+            if ($book->control("modify") == "") {
+                return "";
             }
-            $err = $book->control("modify");
-            if ($err == "") return "";
         }
         
         return _("need modify acl in book");
@@ -48,4 +45,3 @@ Class _CHAPTER extends Doc
 /*
  * @end-method-ignore
 */
-?>

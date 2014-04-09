@@ -41,6 +41,7 @@ Class _BOOK extends Dir
     }
     /**
      * Return list of chapters
+     * @throws Dcp\Db\Exception
      * @return array of document array
      */
     function getChapters()
@@ -112,6 +113,7 @@ Class _BOOK extends Dir
      * @param string $target
      * @param bool $ulink
      * @param bool $abstract
+     * @throws Dcp\Db\Exception
      * @templateController
      */
     function openbook($target = "_self", $ulink = true, $abstract = false)
@@ -119,7 +121,7 @@ Class _BOOK extends Dir
         $this->viewbook($target, $ulink, $abstract);
         $this->gentdm($target, $ulink, $abstract);
         
-        $chapid = getFamIdFromName($this->dbaccess, "CHAPTER");
+        $chapid = \Dcp\DocManager::getFamilyIdFromName("CHAPTER");
         $filter = array();
         $filter[] = "fromid != $chapid";
         $tannx = $this->getContent(true, $filter);
@@ -134,6 +136,7 @@ Class _BOOK extends Dir
      * @param string $target
      * @param bool $ulink
      * @param bool $abstract
+     * @throws Dcp\Db\Exception
      * @templateController
      */
     function genhtml($target = "_self", $ulink = true, $abstract = false)
@@ -185,6 +188,9 @@ Class _BOOK extends Dir
     }
     /**
      * @param Dir $copyfrom
+     * @throws Dcp\Exception
+     * @throws Dcp\DocManager\Exception
+     * @throws Dcp\Db\Exception
      * @return string|void
      */
     function postCopy(&$copyfrom)
@@ -214,7 +220,7 @@ Class _BOOK extends Dir
             }
         }
         
-        $chapid = getFamIdFromName($this->dbaccess, "CHAPTER");
+        $chapid = \Dcp\DocManager::getFamilyIdFromName("CHAPTER");
         $filter = array();
         $filter[] = "fromid != $chapid";
         $tannx = $copyfrom->getContent(true, $filter);
@@ -254,7 +260,7 @@ Class _BOOK extends Dir
             addWarningMsg(_("TE engine not activated"));
             return;
         }
-        if (@include_once ("WHAT/Class.TEClient.php")) {
+        if (\Dcp\Autoloader::classExists('Dcp\TransformationEngine\Client')) {
             include_once "FDL/Class.TaskRequest.php";
             global $action;
             $action->parent->AddJsRef($action->GetParam("CORE_PUBURL") . "/BOOK/Layout/genpdf.js");
@@ -303,7 +309,7 @@ Class _BOOK extends Dir
                 $engine = 'pdf';
                 $callback = $urlindex . "&sole=Y&app=FDL&action=INSERTFILE&engine=$engine&vidout=$vid&name=" . urlencode($this->title) . ".pdf";
             }
-            $ot = new TransformationEngine(getParam("TE_HOST") , getParam("TE_PORT"));
+            $ot = new \Dcp\TransformationEngine\Client(getParam("TE_HOST") , getParam("TE_PORT"));
             $html = preg_replace('/<font([^>]*)face="([^"]*)"/is', "<font\\1", $html);
             $html = preg_replace(array(
                 "/SRC=\"([^\"]+)\"/e",
@@ -336,6 +342,7 @@ Class _BOOK extends Dir
                 $vf = initVaultAccess();
                 $filename = uniqid("/var/tmp/txt-" . $vid . '-');
                 file_put_contents($filename, $err);
+                $info = new VaultFileInfo();
                 $vf->Retrieve($vid, $info);
                 $vf->Save($filename, false, $vid);
                 @unlink($filename);
@@ -361,7 +368,7 @@ Class _BOOK extends Dir
             addWarningMsg(_("TE engine not activated"));
             return;
         }
-        if (@include_once ("WHAT/Class.TEClient.php")) {
+        if (\Dcp\Autoloader::classExists('Dcp\TransformationEngine\Client')) {
             include_once "FDL/Class.TaskRequest.php";
             
             $tid = GetHttpVars("tid");
@@ -383,7 +390,7 @@ Class _BOOK extends Dir
                 
                 $urlindex = getOpenTeUrl();
                 $callback = $urlindex . "&sole=Y&app=FDL&action=INSERTFILE&engine=$engine&vidout=$vid&name=" . urlencode($this->title) . ".pdf";
-                $ot = new TransformationEngine(getParam("TE_HOST") , getParam("TE_PORT"));
+                $ot = new \Dcp\TransformationEngine\Client(getParam("TE_HOST") , getParam("TE_PORT"));
                 
                 $err = $ot->sendTransformation($engine, $vid, $filename, $callback, $info);
                 @unlink($filename);
@@ -457,7 +464,7 @@ Class _BOOK extends Dir
             "bmp"
         );
         
-        if (preg_match("/vid=([0-9]+)/", $src, $reg)) {
+        if (preg_match('/vid=([0-9]+)/', $src, $reg)) {
             $info = vault_properties($reg[1]);
             if (!in_array(strtolower(fileextension($info->path)) , $vext)) return "";
             
@@ -475,34 +482,34 @@ Class _BOOK extends Dir
             }
         }
         
-        if (preg_match("/^\s*$/", $argv['docid'])) {
+        if (preg_match('/^\s*$/', $argv['docid'])) {
             $this->addHistoryEntry(__CLASS__ . "::" . __FUNCTION__ . " " . sprintf("Empty '%s' in '%s'.", 'docid', $src) , HISTO_ERROR);
             return "";
         }
         $docid = $argv['docid'];
         
-        if (preg_match("/^\s*$/", $argv['attrid'])) {
+        if (preg_match('/^\s*$/', $argv['attrid'])) {
             $this->addHistoryEntry(__CLASS__ . "::" . __FUNCTION__ . " " . sprintf("Empty '%s' in '%s'.", 'attrid', $src) , HISTO_ERROR);
             return "";
         }
         $attrid = $argv['attrid'];
         
-        if (preg_match("/^\s*$/", $argv['index'])) {
+        if (preg_match('/^\s*$/', $argv['index'])) {
             $this->addHistoryEntry(__CLASS__ . "::" . __FUNCTION__ . " " . sprintf("Empty '%s' in '%s'.", 'index', $src) , HISTO_ERROR);
             return "";
         }
         $index = $argv['index'];
         
-        $doc = new_Doc($this->dbaccess, $docid);
-        if (!is_object($doc) || !$doc->isAlive()) {
+        $doc = \Dcp\DocManager::getDocument($docid);
+        if ($doc === null || !$doc->isAlive()) {
             $this->addHistoryEntry(__CLASS__ . "::" . __FUNCTION__ . " " . sprintf("Document with id '%s' does not exists or is not alive.", $docid) , HISTO_ERROR);
             return "";
         }
         
         if ($index < 0) {
-            $file = $doc->getValue($attrid);
+            $file = $doc->getRawValue($attrid);
         } else {
-            $tvalue = $doc->getTValue($attrid);
+            $tvalue = $doc->getMultipleRawValues($attrid);
             if ($index >= count($tvalue)) {
                 $this->addHistoryEntry(__CLASS__ . "::" . __FUNCTION__ . " " . sprintf("Out of range index '%s' for attrid '%s' in document '%s'.", $index, $attrid, $docid) , HISTO_ERROR);
                 return "";
@@ -549,4 +556,3 @@ Class _BOOK extends Dir
 /*
  * @end-method-ignore
 */
-?>
