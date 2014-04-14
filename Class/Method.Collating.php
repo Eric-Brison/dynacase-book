@@ -17,7 +17,7 @@ Class _COLLATING extends Doc
     /*
      * @end-method-ignore
     */
-    function specRefresh()
+    function postRefresh()
     {
         $tchaps = $this->getMultipleRawValues("coll_chapid");
         $tattrids = $this->getMultipleRawValues("coll_attrid");
@@ -92,7 +92,7 @@ Class _COLLATING extends Doc
         if ($maxd > $prod) {
             return _("the collating is not up to date. Need collate it");
         }
-        return "";
+        return parent::postRefresh();
     }
     
     function maxdate($t)
