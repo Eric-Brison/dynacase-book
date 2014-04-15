@@ -7,11 +7,9 @@
 /**
  * Specials methods for BOOK family
  */
-/**
- * @begin-method-ignore
- * this part will be deleted when construct document class until end-method-ignore
- */
-Class _COLLATING extends Doc
+namespace Dcp\Book;
+
+Class Collating extends \Dcp\Family\Document
 {
     private $ott;
     /*
@@ -120,8 +118,8 @@ Class _COLLATING extends Doc
         if ($ott) {
             $outfile = uniqid(sys_get_temp_dir() . "/merge") . ".zip";
             $tfiles = $this->getMultipleRawValues("coll_chapfile");
-            $zip = new ZipArchive;
-            if ($zip->open($outfile, ZIPARCHIVE::CREATE) === true) {
+            $zip = new \ZipArchive;
+            if ($zip->open($outfile, \ZIPARCHIVE::CREATE) === true) {
                 $file = $this->vault_filename_fromvalue($ott, true);
                 if ($file) {
                     if ($zip->addFile($file, sprintf("%05d.%s", 0, getFileExtension(basename($file))))) {
@@ -184,11 +182,4 @@ Class _COLLATING extends Doc
             $this->setFile("coll_allodt", $cible);
         }
     }
-    /**
-     * @begin-method-ignore
-     * this part will be deleted when construct document class until end-method-ignore
-     */
 }
-/*
- * @end-method-ignore
-*/

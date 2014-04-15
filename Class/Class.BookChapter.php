@@ -7,16 +7,10 @@
 /**
  * Specials methods for CHAPTER family
  */
-/**
- * @begin-method-ignore
- * this part will be deleted when construct document class until end-method-ignore
- */
-Class _CHAPTER extends Doc
+namespace Dcp\Book;
+
+Class Chapter extends \Dcp\Family\Document
 {
-    /*
-     * @end-method-ignore
-    */
-    
     function preCreated()
     {
         $book = \Dcp\DocManager::getDocument($this->getRawValue("chap_bookid"));
@@ -37,11 +31,4 @@ Class _CHAPTER extends Doc
         $err = $this->modify();
         return $err;
     }
-    /**
-     * @begin-method-ignore
-     * this part will be deleted when construct document class until end-method-ignore
-     */
 }
-/*
- * @end-method-ignore
-*/
