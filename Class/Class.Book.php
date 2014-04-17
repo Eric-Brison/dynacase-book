@@ -7,22 +7,17 @@
 /**
  * Specials methods for BOOK family
  */
-/**
- * @begin-method-ignore
- * this part will be deleted when construct document class until end-method-ignore
- */
-Class _BOOK extends Dir
+namespace Dcp\Book;
+
+Class Book extends \Dcp\Family\Dir
 {
-    /*
-     * @end-method-ignore
-    */
     public $defaultview = "BOOK:VIEWBOOK";
     private $ispdf;
     
-    function specRefresh()
+    function postRefresh()
     {
-        
         $this->AddParamRefresh("book_tplodt", "book_headleft,book_headmiddle,book_headright,book_footleft,book_footmiddle,book_footright,book_tplodt");
+        return parent::postRefresh();
     }
     /**
      * @param string $target
@@ -41,7 +36,7 @@ Class _BOOK extends Dir
     }
     /**
      * Return list of chapters
-     * @throws Dcp\Db\Exception
+     * @throws \Dcp\Db\Exception
      * @return array of document array
      */
     function getChapters()
@@ -49,7 +44,7 @@ Class _BOOK extends Dir
         
         $filter[] = "chap_bookid='" . $this->initid . "'";
         $filter[] = "doctype!='T'";
-        $search = new SearchDoc("", "CHAPTER");
+        $search = new \SearchDoc("", "CHAPTER");
         foreach ($filter as $currentFilter) {
             $search->addFilter($currentFilter);
         }
@@ -113,7 +108,7 @@ Class _BOOK extends Dir
      * @param string $target
      * @param bool $ulink
      * @param bool $abstract
-     * @throws Dcp\Db\Exception
+     * @throws \Dcp\Db\Exception
      * @templateController
      */
     function openbook($target = "_self", $ulink = true, $abstract = false)
@@ -136,7 +131,7 @@ Class _BOOK extends Dir
      * @param string $target
      * @param bool $ulink
      * @param bool $abstract
-     * @throws Dcp\Db\Exception
+     * @throws \Dcp\Db\Exception
      * @templateController
      */
     function genhtml($target = "_self", $ulink = true, $abstract = false)
@@ -187,10 +182,10 @@ Class _BOOK extends Dir
         return $hf;
     }
     /**
-     * @param Dir $copyfrom
-     * @throws Dcp\Exception
-     * @throws Dcp\DocManager\Exception
-     * @throws Dcp\Db\Exception
+     * @param \Dcp\Family\Dir $copyfrom
+     * @throws \Dcp\Exception
+     * @throws \Dcp\DocManager\Exception
+     * @throws \Dcp\Db\Exception
      * @return string|void
      */
     function postCopy(&$copyfrom)
@@ -199,7 +194,7 @@ Class _BOOK extends Dir
         $filter[] = "chap_bookid=" . $copyfrom->initid;
         $filter[] = "doctype!='T'";
         
-        $search = new SearchDoc("", "CHAPTER");
+        $search = new \SearchDoc("", "CHAPTER");
         foreach ($filter as $currentFilter) {
             $search->addFilter($currentFilter);
         }
@@ -234,7 +229,7 @@ Class _BOOK extends Dir
         $filter[] = "chap_bookid=" . $this->initid;
         $filter[] = "doctype!='T'";
         
-        $search = new SearchDoc("", "CHAPTER");
+        $search = new \SearchDoc("", "CHAPTER");
         foreach ($filter as $currentFilter) {
             $search->addFilter($currentFilter);
         }
@@ -275,7 +270,7 @@ Class _BOOK extends Dir
             if (preg_match(PREGEXPFILE, $va, $reg)) {
                 $vid = $reg[2];
                 
-                $ofout = new VaultDiskStorage($this->dbaccess, $vid);
+                $ofout = new \VaultDiskStorage($this->dbaccess, $vid);
                 $ofout->teng_state = 2;
                 $ofout->modify();
             } else {
@@ -330,7 +325,7 @@ Class _BOOK extends Dir
             @unlink($filename);
             if ($err == "") {
                 global $action;
-                $tr = new TaskRequest($this->dbaccess);
+                $tr = new \TaskRequest($this->dbaccess);
                 $tr->tid = $info["tid"];
                 $tr->fkey = $vid;
                 $tr->status = $info["status"];
@@ -342,7 +337,7 @@ Class _BOOK extends Dir
                 $vf = initVaultAccess();
                 $filename = uniqid("/var/tmp/txt-" . $vid . '-');
                 file_put_contents($filename, $err);
-                $info = new VaultFileInfo();
+                $info = new \VaultFileInfo();
                 $vf->Retrieve($vid, $info);
                 $vf->Save($filename, false, $vid);
                 @unlink($filename);
@@ -396,7 +391,7 @@ Class _BOOK extends Dir
                 @unlink($filename);
                 if ($err == "") {
                     global $action;
-                    $tr = new TaskRequest($this->dbaccess);
+                    $tr = new \TaskRequest($this->dbaccess);
                     $tr->tid = $info["tid"];
                     $tr->fkey = $vid;
                     $tr->status = $info["status"];
@@ -542,17 +537,10 @@ Class _BOOK extends Dir
             include_once "VAULT/Class.VaultDiskStorage.php";
             $vid = $reg[2];
             
-            $ofout = new VaultDiskStorage($this->dbaccess, $vid);
+            $ofout = new \VaultDiskStorage($this->dbaccess, $vid);
             
             return $ofout->mdate;
         }
         return "";
     }
-    /**
-     * @begin-method-ignore
-     * this part will be deleted when construct document class until end-method-ignore
-     */
 }
-/*
- * @end-method-ignore
-*/
